@@ -1,5 +1,7 @@
 "use client";
 
+import { Dumbbell, Briefcase, BookOpen, PartyPopper, Car, Home, Smile, Zap, Wind, Target, Heart, Cloud } from "lucide-react";
+
 export default function HomePage() {
   const handleContextClick = (context: string) => {
     console.log(`Selected context: ${context}`);
@@ -30,6 +32,7 @@ export default function HomePage() {
               onClick={() => handleContextClick("Workout")}
               className="bg-zinc-900 rounded-lg md:rounded-2xl p-3 md:p-6 lg:p-8 text-white shadow-lg hover:shadow-2xl hover:scale-105 transform transition-all duration-200 flex flex-col items-center justify-center text-center space-y-2 md:space-y-4 min-h-[100px] md:min-h-[140px]"
             >
+              <Dumbbell className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
               <h3 className="text-sm md:text-xl lg:text-2xl font-bold">Workout</h3>
               <p className="text-xs md:text-sm opacity-90">
                 High energy for exercise
@@ -41,6 +44,7 @@ export default function HomePage() {
               onClick={() => handleContextClick("Work")}
               className="bg-zinc-900 rounded-lg md:rounded-2xl p-3 md:p-6 lg:p-8 text-white shadow-lg hover:shadow-2xl hover:scale-105 transform transition-all duration-200 flex flex-col items-center justify-center text-center space-y-2 md:space-y-4 min-h-[100px] md:min-h-[140px]"
             >
+              <Briefcase className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
               <h3 className="text-sm md:text-xl lg:text-2xl font-bold">Work</h3>
               <p className="text-xs md:text-sm opacity-90">
                 Focus and productivity
@@ -52,6 +56,7 @@ export default function HomePage() {
               onClick={() => handleContextClick("Study")}
               className="bg-zinc-900 rounded-lg md:rounded-2xl p-3 md:p-6 lg:p-8 text-white shadow-lg hover:shadow-2xl hover:scale-105 transform transition-all duration-200 flex flex-col items-center justify-center text-center space-y-2 md:space-y-4 min-h-[100px] md:min-h-[140px]"
             >
+              <BookOpen className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
               <h3 className="text-sm md:text-xl lg:text-2xl font-bold">Study</h3>
               <p className="text-xs md:text-sm opacity-90">
                 Concentration mode
@@ -63,6 +68,7 @@ export default function HomePage() {
               onClick={() => handleContextClick("Party")}
               className="bg-zinc-900 rounded-lg md:rounded-2xl p-3 md:p-6 lg:p-8 text-white shadow-lg hover:shadow-2xl hover:scale-105 transform transition-all duration-200 flex flex-col items-center justify-center text-center space-y-2 md:space-y-4 min-h-[100px] md:min-h-[140px]"
             >
+              <PartyPopper className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
               <h3 className="text-sm md:text-xl lg:text-2xl font-bold">Party</h3>
               <p className="text-xs md:text-sm opacity-90">
                 Upbeat and festive
@@ -74,6 +80,7 @@ export default function HomePage() {
               onClick={() => handleContextClick("Commute")}
               className="bg-zinc-900 rounded-lg md:rounded-2xl p-3 md:p-6 lg:p-8 text-white shadow-lg hover:shadow-2xl hover:scale-105 transform transition-all duration-200 flex flex-col items-center justify-center text-center space-y-2 md:space-y-4 min-h-[100px] md:min-h-[140px]"
             >
+              <Car className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
               <h3 className="text-sm md:text-xl lg:text-2xl font-bold">Commute</h3>
               <p className="text-xs md:text-sm opacity-90">
                 Travel and transit
@@ -85,6 +92,7 @@ export default function HomePage() {
               onClick={() => handleContextClick("Relax")}
               className="bg-zinc-900 rounded-lg md:rounded-2xl p-3 md:p-6 lg:p-8 text-white shadow-lg hover:shadow-2xl hover:scale-105 transform transition-all duration-200 flex flex-col items-center justify-center text-center space-y-2 md:space-y-4 min-h-[100px] md:min-h-[140px]"
             >
+              <Home className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
               <h3 className="text-sm md:text-xl lg:text-2xl font-bold">Relax</h3>
               <p className="text-xs md:text-sm opacity-90">
                 Chill at home
@@ -111,6 +119,7 @@ export default function HomePage() {
               onClick={() => handleMoodClick("Happy")}
               className="bg-zinc-900 rounded-lg md:rounded-2xl p-3 md:p-6 lg:p-8 text-white shadow-lg hover:shadow-2xl hover:scale-105 transform transition-all duration-200 flex flex-col items-center justify-center text-center space-y-2 md:space-y-4 min-h-[100px] md:min-h-[140px]"
             >
+              <Smile className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
               <h3 className="text-sm md:text-xl lg:text-2xl font-bold">Happy</h3>
               <p className="text-xs md:text-sm opacity-90">
                 Positive vibes
@@ -122,6 +131,7 @@ export default function HomePage() {
               onClick={() => handleMoodClick("Energetic")}
               className="bg-zinc-900 rounded-lg md:rounded-2xl p-3 md:p-6 lg:p-8 text-white shadow-lg hover:shadow-2xl hover:scale-105 transform transition-all duration-200 flex flex-col items-center justify-center text-center space-y-2 md:space-y-4 min-h-[100px] md:min-h-[140px]"
             >
+              <Zap className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
               <h3 className="text-sm md:text-xl lg:text-2xl font-bold">Energetic</h3>
               <p className="text-xs md:text-sm opacity-90">
                 Pump it up
@@ -133,6 +143,7 @@ export default function HomePage() {
               onClick={() => handleMoodClick("Calm")}
               className="bg-zinc-900 rounded-lg md:rounded-2xl p-3 md:p-6 lg:p-8 text-white shadow-lg hover:shadow-2xl hover:scale-105 transform transition-all duration-200 flex flex-col items-center justify-center text-center space-y-2 md:space-y-4 min-h-[100px] md:min-h-[140px]"
             >
+              <Wind className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
               <h3 className="text-sm md:text-xl lg:text-2xl font-bold">Calm</h3>
               <p className="text-xs md:text-sm opacity-90">
                 Peaceful & relaxed
@@ -144,6 +155,7 @@ export default function HomePage() {
               onClick={() => handleMoodClick("Focused")}
               className="bg-zinc-900 rounded-lg md:rounded-2xl p-3 md:p-6 lg:p-8 text-white shadow-lg hover:shadow-2xl hover:scale-105 transform transition-all duration-200 flex flex-col items-center justify-center text-center space-y-2 md:space-y-4 min-h-[100px] md:min-h-[140px]"
             >
+              <Target className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
               <h3 className="text-sm md:text-xl lg:text-2xl font-bold">Focused</h3>
               <p className="text-xs md:text-sm opacity-90">
                 Deep concentration
@@ -155,6 +167,7 @@ export default function HomePage() {
               onClick={() => handleMoodClick("Romantic")}
               className="bg-zinc-900 rounded-lg md:rounded-2xl p-3 md:p-6 lg:p-8 text-white shadow-lg hover:shadow-2xl hover:scale-105 transform transition-all duration-200 flex flex-col items-center justify-center text-center space-y-2 md:space-y-4 min-h-[100px] md:min-h-[140px]"
             >
+              <Heart className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
               <h3 className="text-sm md:text-xl lg:text-2xl font-bold">Romantic</h3>
               <p className="text-xs md:text-sm opacity-90">
                 Love & emotion
@@ -166,6 +179,7 @@ export default function HomePage() {
               onClick={() => handleMoodClick("Melancholic")}
               className="bg-zinc-900 rounded-lg md:rounded-2xl p-3 md:p-6 lg:p-8 text-white shadow-lg hover:shadow-2xl hover:scale-105 transform transition-all duration-200 flex flex-col items-center justify-center text-center space-y-2 md:space-y-4 min-h-[100px] md:min-h-[140px]"
             >
+              <Cloud className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
               <h3 className="text-sm md:text-xl lg:text-2xl font-bold">Melancholic</h3>
               <p className="text-xs md:text-sm opacity-90">
                 Reflective & moody
