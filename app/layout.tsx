@@ -9,7 +9,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Moodify - Music that matches your mood",
-  description: "Discover the perfect playlist for any moment. Moodify creates personalized music recommendations based on how you feel.",
+  description: "Discover the perfect playlist for any moment.",
 };
 
 export default function RootLayout({
@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${inter.className} antialiased bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100`}>
         {children}
       </body>
     </html>
