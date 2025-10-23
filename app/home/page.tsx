@@ -61,7 +61,7 @@ export default function HomePage() {
             Welcome, {session?.user?.name || 'User'}!
           </h1>
           <p className="text-lg text-gray-600">
-            Let's create the perfect playlist for you
+            Let&apos;s create the perfect playlist for you
           </p>
         </div>
         
