@@ -3,6 +3,99 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 
+// Spotify API funktioner
+async function createSpotifyPlaylist(accessToken: string, context: string, mood: string) {
+  const playlistName = `Moodify - ${context} (${mood})`;
+  const description = `En personlig playlist för ${context.toLowerCase()} när du känner dig ${mood.toLowerCase()}`;
+  
+  const response = await fetch('https://api.spotify.com/v1/me/playlists', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name: playlistName,
+      description: description,
+      public: true
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to create playlist: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
+async function getTrackRecommendations(accessToken: string, context: string, mood: string) {
+  // Mappa context och mood till Spotify parametrar
+  const { seedGenres, targetFeatures } = mapContextAndMood(context, mood);
+  
+  const params = new URLSearchParams({
+    limit: '20',
+    seed_genres: seedGenres.join(','),
+    ...targetFeatures
+  });
+
+  const response = await fetch(`https://api.spotify.com/v1/recommendations?${params}`, {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to get recommendations: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.tracks.map((track: any) => track.uri);
+}
+
+async function addTracksToPlaylist(accessToken: string, playlistId: string, trackUris: string[]) {
+  const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      uris: trackUris
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to add tracks: ${response.status}`);
+  }
+}
+
+function mapContextAndMood(context: string, mood: string) {
+  // Mappa context till genres
+  const contextGenres: { [key: string]: string[] } = {
+    'Work': ['work-out', 'focus', 'ambient'],
+    'Study': ['study', 'ambient', 'classical'],
+    'Workout': ['work-out', 'fitness', 'pop'],
+    'Party': ['party', 'dance', 'pop'],
+    'Commute': ['road-trip', 'pop', 'indie'],
+    'Relax': ['chill', 'ambient', 'acoustic']
+  };
+
+  // Mappa mood till audio features
+  const moodFeatures: { [key: string]: any } = {
+    'Happy': { valence: 0.8, energy: 0.7 },
+    'Energetic': { energy: 0.9, valence: 0.7 },
+    'Calm': { valence: 0.6, energy: 0.3 },
+    'Focused': { energy: 0.5, valence: 0.5 },
+    'Romantic': { valence: 0.7, energy: 0.4 },
+    'Melancholic': { valence: 0.2, energy: 0.3 }
+  };
+
+  return {
+    seedGenres: contextGenres[context] || ['pop'],
+    targetFeatures: moodFeatures[mood] || { valence: 0.5, energy: 0.5 }
+  };
+}
+
 interface PlaylistGeneratorProps {
   context: string;
   mood: string;
