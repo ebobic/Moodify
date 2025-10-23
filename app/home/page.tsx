@@ -1,14 +1,17 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Dumbbell, Briefcase, BookOpen, PartyPopper, Car, Home, Smile, Zap, Wind, Target, Heart, Cloud } from "lucide-react";
 import { Navbar } from "../components/Navbar";
+import { PlaylistGenerator } from "../components/PlaylistGenerator";
 
 export default function HomePage() {
   const step2Ref = useRef<HTMLDivElement>(null);
   const step3Ref = useRef<HTMLDivElement>(null);
   const { data: session, status } = useSession();
+  const [selectedContext, setSelectedContext] = useState<string>("");
+  const [selectedMood, setSelectedMood] = useState<string>("");
 
   // Loading state medan session laddas
   if (status === "loading") {
@@ -45,11 +48,13 @@ export default function HomePage() {
 
   const handleContextClick = (context: string) => {
     console.log(`Selected context: ${context}`);
+    setSelectedContext(context);
     scrollToStep(step2Ref);
   };
 
   const handleMoodClick = (mood: string) => {
     console.log(`Selected mood: ${mood}`);
+    setSelectedMood(mood);
     scrollToStep(step3Ref);
   };
 
@@ -313,9 +318,22 @@ export default function HomePage() {
 
               {/* Generate Button */}
               <div className="pt-4">
-                <button className="bg-black hover:bg-gray-800 text-white font-semibold px-12 py-5 rounded-full text-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 cursor-pointer">
-                  Generate Playlist
-                </button>
+                {selectedContext && selectedMood ? (
+                  <PlaylistGenerator 
+                    context={selectedContext}
+                    mood={selectedMood}
+                    onComplete={(playlistUrl) => {
+                      console.log('Playlist created:', playlistUrl);
+                    }}
+                    onError={(error) => {
+                      console.error('Playlist creation failed:', error);
+                    }}
+                  />
+                ) : (
+                  <div className="text-gray-500">
+                    Please select both context and mood to generate a playlist
+                  </div>
+                )}
               </div>
             </div>
           </div>
