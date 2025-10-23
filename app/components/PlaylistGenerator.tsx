@@ -22,7 +22,9 @@ async function createSpotifyPlaylist(accessToken: string, context: string, mood:
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to create playlist: ${response.status}`);
+    const errorText = await response.text();
+    console.error('Create playlist error:', response.status, errorText);
+    throw new Error(`Failed to create playlist: ${response.status} - ${errorText}`);
   }
 
   return await response.json();
@@ -32,7 +34,8 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
   // Mappa context och mood till Spotify parametrar
   const { seedGenres, targetFeatures } = mapContextAndMood(context, mood);
   
-  const params = new URLSearchParams({
+  // Försök först med alla parametrar
+  let params = new URLSearchParams({
     limit: '20',
     seed_genres: seedGenres.slice(0, 5).join(','), // Max 5 genres
     ...(targetFeatures.valence !== undefined && { target_valence: targetFeatures.valence.toString() }),
@@ -45,11 +48,26 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
     targetFeatures
   });
 
-  const response = await fetch(`https://api.spotify.com/v1/recommendations?${params}`, {
+  let response = await fetch(`https://api.spotify.com/v1/recommendations?${params}`, {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
     }
   });
+
+  // Om första försöket misslyckas, försök med bara genres
+  if (!response.ok) {
+    console.log('First attempt failed, trying with genres only...');
+    params = new URLSearchParams({
+      limit: '20',
+      seed_genres: seedGenres.slice(0, 5).join(',')
+    });
+    
+    response = await fetch(`https://api.spotify.com/v1/recommendations?${params}`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      }
+    });
+  }
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -58,6 +76,7 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
   }
 
   const data = await response.json();
+  console.log('Recommendations response:', data);
   return data.tracks.map((track: { uri: string }) => track.uri);
 }
 
@@ -74,7 +93,9 @@ async function addTracksToPlaylist(accessToken: string, playlistId: string, trac
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to add tracks: ${response.status}`);
+    const errorText = await response.text();
+    console.error('Add tracks error:', response.status, errorText);
+    throw new Error(`Failed to add tracks: ${response.status} - ${errorText}`);
   }
 }
 
@@ -125,7 +146,7 @@ export function PlaylistGenerator({
 
   const generatePlaylist = async () => {
     if (!session?.accessToken) {
-      const errorMsg = "No access token available";
+      const errorMsg = "No access token available. Please log out and log in again.";
       setError(errorMsg);
       onError?.(errorMsg);
       return;
@@ -136,16 +157,26 @@ export function PlaylistGenerator({
 
     try {
       console.log(`Genererar playlist för context: ${context}, mood: ${mood}`);
+      console.log('Access token available:', !!session.accessToken);
       
       // 1. Skapa en ny playlist
+      console.log('Creating playlist...');
       const playlist = await createSpotifyPlaylist(session.accessToken, context, mood);
+      console.log('Playlist created:', playlist);
       
       // 2. Hämta låtrekommendationer baserat på context och mood
+      console.log('Getting track recommendations...');
       const tracks = await getTrackRecommendations(session.accessToken, context, mood);
+      console.log('Tracks found:', tracks.length);
       
       // 3. Lägg till låtar till playlisten
       if (tracks.length > 0) {
+        console.log('Adding tracks to playlist...');
         await addTracksToPlaylist(session.accessToken, playlist.id, tracks);
+        console.log('Tracks added successfully');
+      } else {
+        console.warn('No tracks found for recommendations');
+        throw new Error('No tracks found for the selected context and mood. Please try different selections.');
       }
       
       // 4. Returnera playlist-URL
@@ -153,6 +184,7 @@ export function PlaylistGenerator({
       onComplete?.(playlist.external_urls.spotify);
       
     } catch (err) {
+      console.error('Playlist generation error:', err);
       const errorMsg = err instanceof Error ? err.message : "Failed to generate playlist";
       setError(errorMsg);
       onError?.(errorMsg);
