@@ -81,12 +81,12 @@ async function addTracksToPlaylist(accessToken: string, playlistId: string, trac
 function mapContextAndMood(context: string, mood: string) {
   // Mappa context till genres
   const contextGenres: { [key: string]: string[] } = {
-    'Work': ['work-out', 'focus', 'ambient'],
-    'Study': ['study', 'ambient', 'classical'],
-    'Workout': ['work-out', 'fitness', 'pop'],
-    'Party': ['party', 'dance', 'pop'],
-    'Commute': ['road-trip', 'pop', 'indie'],
-    'Relax': ['chill', 'ambient', 'acoustic']
+    'Work': ['pop', 'ambient', 'classical'],
+    'Study': ['ambient', 'classical', 'pop'],
+    'Workout': ['pop', 'rock', 'electronic'],
+    'Party': ['pop', 'dance', 'electronic'],
+    'Commute': ['pop', 'indie', 'rock'],
+    'Relax': ['ambient', 'acoustic', 'pop']
   };
 
   // Mappa mood till audio features
