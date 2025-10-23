@@ -1,11 +1,13 @@
 "use client";
 
 import { useRef } from "react";
+import { useSession } from "next-auth/react";
 import { Dumbbell, Briefcase, BookOpen, PartyPopper, Car, Home, Smile, Zap, Wind, Target, Heart, Cloud } from "lucide-react";
 
 export default function HomePage() {
   const step2Ref = useRef<HTMLDivElement>(null);
   const step3Ref = useRef<HTMLDivElement>(null);
+  const { data: session, status } = useSession();
 
   const scrollToStep = (ref: React.RefObject<HTMLDivElement | null>) => {
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
