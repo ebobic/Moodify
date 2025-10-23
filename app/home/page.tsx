@@ -1,11 +1,42 @@
 "use client";
 
 import { useRef } from "react";
-import { Dumbbell, Briefcase, BookOpen, PartyPopper, Car, Home, Smile, Zap, Wind, Target, Heart, Cloud } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { Dumbbell, Briefcase, BookOpen, PartyPopper, Car, Home, Smile, Zap, Wind, Target, Heart, Cloud, LogOut } from "lucide-react";
 
 export default function HomePage() {
   const step2Ref = useRef<HTMLDivElement>(null);
   const step3Ref = useRef<HTMLDivElement>(null);
+  const { data: session, status } = useSession();
+
+  // Loading state medan session laddas
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state för icke-inloggade användare
+  if (status === "unauthenticated") {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <p className="text-gray-600">Please log in to access this page.</p>
+          <button 
+            onClick={() => window.location.href = '/'}
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-full transition-colors"
+          >
+            Go to login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const scrollToStep = (ref: React.RefObject<HTMLDivElement | null>) => {
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -21,9 +52,44 @@ export default function HomePage() {
     scrollToStep(step3Ref);
   };
 
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/' });
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-8 py-16">
+        {/* Välkomst-meddelande med användarinfo från Spotify Session */}
+        <div className="text-center mb-16">
+          {/* Logout knapp */}
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
+          </div>
+          
+          {/* Visa användarens profilbild från Spotify om tillgänglig */}
+          {session?.user?.image && (
+            <div className="mb-4">
+              <img 
+                src={session.user.image} 
+                alt="Profile picture" 
+                className="w-20 h-20 rounded-full mx-auto border-2 border-gray-200"
+              />
+            </div>
+          )}
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+            Welcome, {session?.user?.name || 'User'}!
+          </h1>
+          <p className="text-lg text-gray-600">
+            Let&apos;s create the perfect playlist for you
+          </p>
+        </div>
+        
         <div className="w-full space-y-32 md:space-y-40">
           {/* Step 1: Listening Context */}
           <div className="space-y-12">
