@@ -126,16 +126,22 @@ export function PlaylistGenerator({
     setError(null);
 
     try {
-      // TODO: Implementera Spotify API-anrop
       console.log(`Genererar playlist för context: ${context}, mood: ${mood}`);
       
-      // Simulera API-anrop för tillfället
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // 1. Skapa en ny playlist
+      const playlist = await createSpotifyPlaylist(session.accessToken, context, mood);
       
-      // TODO: Ersätt med riktig playlist-URL
-      const mockPlaylistUrl = `https://open.spotify.com/playlist/mock-${context}-${mood}`;
-      setPlaylistUrl(mockPlaylistUrl);
-      onComplete?.(mockPlaylistUrl);
+      // 2. Hämta låtrekommendationer baserat på context och mood
+      const tracks = await getTrackRecommendations(session.accessToken, context, mood);
+      
+      // 3. Lägg till låtar till playlisten
+      if (tracks.length > 0) {
+        await addTracksToPlaylist(session.accessToken, playlist.id, tracks);
+      }
+      
+      // 4. Returnera playlist-URL
+      setPlaylistUrl(playlist.external_urls.spotify);
+      onComplete?.(playlist.external_urls.spotify);
       
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to generate playlist";
