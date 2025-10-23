@@ -34,9 +34,15 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
   
   const params = new URLSearchParams({
     limit: '20',
-    seed_genres: seedGenres.join(','),
+    seed_genres: seedGenres.slice(0, 5).join(','), // Max 5 genres
     ...(targetFeatures.valence !== undefined && { target_valence: targetFeatures.valence.toString() }),
     ...(targetFeatures.energy !== undefined && { target_energy: targetFeatures.energy.toString() })
+  });
+
+  console.log('Spotify API Request:', {
+    url: `https://api.spotify.com/v1/recommendations?${params}`,
+    seedGenres: seedGenres.slice(0, 5),
+    targetFeatures
   });
 
   const response = await fetch(`https://api.spotify.com/v1/recommendations?${params}`, {
@@ -46,7 +52,9 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to get recommendations: ${response.status}`);
+    const errorText = await response.text();
+    console.error('Spotify API Error:', response.status, errorText);
+    throw new Error(`Failed to get recommendations: ${response.status} - ${errorText}`);
   }
 
   const data = await response.json();
