@@ -55,8 +55,18 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-8 py-16">
-        {/* Welcome Message */}
+        {/* Välkomst-meddelande med användarinfo från Spotify Session */}
         <div className="text-center mb-16">
+          {/* Visa användarens profilbild från Spotify om tillgänglig */}
+          {session?.user?.image && (
+            <div className="mb-4">
+              <img 
+                src={session.user.image} 
+                alt="Profile picture" 
+                className="w-20 h-20 rounded-full mx-auto border-2 border-gray-200"
+              />
+            </div>
+          )}
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             Welcome, {session?.user?.name || 'User'}!
           </h1>
