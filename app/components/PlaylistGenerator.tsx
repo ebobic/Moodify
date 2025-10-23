@@ -35,7 +35,8 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
   const params = new URLSearchParams({
     limit: '20',
     seed_genres: seedGenres.join(','),
-    ...targetFeatures
+    ...(targetFeatures.valence !== undefined && { target_valence: targetFeatures.valence.toString() }),
+    ...(targetFeatures.energy !== undefined && { target_energy: targetFeatures.energy.toString() })
   });
 
   const response = await fetch(`https://api.spotify.com/v1/recommendations?${params}`, {
@@ -49,7 +50,7 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
   }
 
   const data = await response.json();
-  return data.tracks.map((track: any) => track.uri);
+  return data.tracks.map((track: { uri: string }) => track.uri);
 }
 
 async function addTracksToPlaylist(accessToken: string, playlistId: string, trackUris: string[]) {
@@ -81,7 +82,7 @@ function mapContextAndMood(context: string, mood: string) {
   };
 
   // Mappa mood till audio features
-  const moodFeatures: { [key: string]: any } = {
+  const moodFeatures: { [key: string]: { valence?: number; energy?: number } } = {
     'Happy': { valence: 0.8, energy: 0.7 },
     'Energetic': { energy: 0.9, valence: 0.7 },
     'Calm': { valence: 0.6, energy: 0.3 },
