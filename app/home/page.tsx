@@ -55,6 +55,16 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-8 py-16">
+        {/* Welcome Message */}
+        <div className="text-center mb-16">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+            Welcome, {session?.user?.name || 'User'}!
+          </h1>
+          <p className="text-lg text-gray-600">
+            Let's create the perfect playlist for you
+          </p>
+        </div>
+        
         <div className="w-full space-y-32 md:space-y-40">
           {/* Step 1: Listening Context */}
           <div className="space-y-12">
