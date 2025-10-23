@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { Dumbbell, Briefcase, BookOpen, PartyPopper, Car, Home, Smile, Zap, Wind, Target, Heart, Cloud, LogOut } from "lucide-react";
+import { Navbar } from "../components/Navbar";
 
 export default function HomePage() {
   const step2Ref = useRef<HTMLDivElement>(null);
@@ -58,6 +59,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Navbar />
       <div className="max-w-7xl mx-auto px-8 py-16">
         {/* Välkomst-meddelande med användarinfo från Spotify Session */}
         <div className="text-center mb-16">
