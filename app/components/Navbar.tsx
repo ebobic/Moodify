@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
 
-export function Nav() {
+export function Navbar() {
   const { data: session } = useSession();
 
   const handleLogout = async () => {
