@@ -1,6 +1,21 @@
+"use client";
+
 import Image from "next/image";
+import { signIn } from "next-auth/react";
+import { useState } from "react";
 
 export function LandingPage() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSpotifyLogin = async () => {
+    setIsLoading(true);
+    try {
+      await signIn("spotify", { callbackUrl: "/home" });
+    } catch (error) {
+      console.error("Login failed:", error);
+      setIsLoading(false);
+    }
+  };
   return (
     <div className="flex items-center justify-center min-h-screen bg-white px-6 py-12">
       <div className="max-w-5xl w-full text-center">
@@ -32,8 +47,12 @@ export function LandingPage() {
 
           {/* CTA Button - Lagom storlek */}
           <div className="pt-4 md:pt-6">
-            <button className="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 md:px-10 md:py-4 rounded-full text-base md:text-lg transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer">
-              Sign in with Spotify
+            <button 
+              onClick={handleSpotifyLogin}
+              disabled={isLoading}
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 md:px-10 md:py-4 rounded-full text-base md:text-lg transition-all duration-300 shadow-md hover:shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? "Loading..." : "Sign in with Spotify"}
             </button>
           </div>
         </div>
