@@ -21,6 +21,23 @@ export default function HomePage() {
     );
   }
 
+  // Error state för icke-inloggade användare
+  if (status === "unauthenticated") {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <p className="text-gray-600">Please log in to access this page.</p>
+          <button 
+            onClick={() => window.location.href = '/'}
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-full transition-colors"
+          >
+            Go to login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const scrollToStep = (ref: React.RefObject<HTMLDivElement | null>) => {
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
