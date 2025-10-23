@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef } from "react";
-import { useSession } from "next-auth/react";
-import { Dumbbell, Briefcase, BookOpen, PartyPopper, Car, Home, Smile, Zap, Wind, Target, Heart, Cloud } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { Dumbbell, Briefcase, BookOpen, PartyPopper, Car, Home, Smile, Zap, Wind, Target, Heart, Cloud, LogOut } from "lucide-react";
 
 export default function HomePage() {
   const step2Ref = useRef<HTMLDivElement>(null);
@@ -52,11 +52,26 @@ export default function HomePage() {
     scrollToStep(step3Ref);
   };
 
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/' });
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-8 py-16">
         {/* Välkomst-meddelande med användarinfo från Spotify Session */}
         <div className="text-center mb-16">
+          {/* Logout knapp */}
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
+          </div>
+          
           {/* Visa användarens profilbild från Spotify om tillgänglig */}
           {session?.user?.image && (
             <div className="mb-4">
