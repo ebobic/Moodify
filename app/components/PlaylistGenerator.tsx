@@ -60,7 +60,7 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
   }
 
   // Skapa flera söktermer baserat på användarens artister + context + mood
-  let allTracks = [];
+  let allTracks: { id: string; uri: string }[] = [];
   
   if (personalArtists.length > 0) {
     // Sök med varje artist för mer variation
@@ -98,7 +98,7 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
     }
   }
 
-  // Ta bort duplicater och returnera max 20 låtar
+  // Ta bort duplicates och returnera max 20 låtar
   const uniqueTracks = allTracks.filter((track, index, self) => 
     index === self.findIndex(t => t.id === track.id)
   ).slice(0, 20);
