@@ -45,6 +45,20 @@ async function createSpotifyPlaylist(accessToken: string, context: string, mood:
 }
 
 async function getTrackRecommendations(accessToken: string, context: string, mood: string) {
+  // Hämta användarens topplåtar för personliga rekommendationer
+  const topTracksResponse = await fetch('https://api.spotify.com/v1/me/top/tracks?limit=5&time_range=medium_term', {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+    }
+  });
+
+  let personalTracks = [];
+  if (topTracksResponse.ok) {
+    const topTracks = await topTracksResponse.json();
+    personalTracks = topTracks.items.map((track: { id: string }) => track.id);
+    console.log('Using user\'s top tracks for personalization:', personalTracks);
+  }
+
   // Skapa smart sökterm baserat på context och mood
   const searchQuery = `${context} ${mood}`;
   console.log('Searching for tracks with query:', searchQuery);
@@ -81,7 +95,17 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
     }
   }
 
-  return searchData.tracks.items.map((track: { uri: string }) => track.uri);
+  // Kombinera sökresultat med användarens topplåtar för personlig touch
+  const allTracks = searchData.tracks.items;
+  
+  // Lägg till användarens topplåtar i början för personlig touch
+  if (personalTracks.length > 0) {
+    const personalUris = personalTracks.map(id => `spotify:track:${id}`);
+    console.log('Adding personal tracks for better personalization');
+    return [...personalUris.slice(0, 3), ...allTracks.slice(0, 17)].map((track: { uri: string }) => track.uri);
+  }
+
+  return allTracks.map((track: { uri: string }) => track.uri);
 }
 
 async function addTracksToPlaylist(accessToken: string, playlistId: string, trackUris: string[]) {
