@@ -74,7 +74,6 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
   const params = new URLSearchParams({
     limit: '20',
     seed_artists: seedArtists.join(','),
-    seed_genres: seedGenres.slice(0, 3).join(','), // Max 3 genres
     ...(targetFeatures.valence !== undefined && { target_valence: targetFeatures.valence.toString() }),
     ...(targetFeatures.energy !== undefined && { target_energy: targetFeatures.energy.toString() })
   });
@@ -82,8 +81,9 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
   console.log('Spotify API Request:', {
     url: `https://api.spotify.com/v1/recommendations?${params}`,
     seedArtists,
-    seedGenres: seedGenres.slice(0, 3),
-    targetFeatures
+    targetFeatures,
+    fullUrl: `https://api.spotify.com/v1/recommendations?${params}`,
+    paramsString: params.toString()
   });
 
   const response = await fetch(`https://api.spotify.com/v1/recommendations?${params}`, {
