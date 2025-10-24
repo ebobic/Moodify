@@ -32,9 +32,9 @@ export function Navbar() {
 
           {/* Användarinfo och Logout */}
           <div className="flex items-center space-x-4">
-            {/* Användarens profilbild och namn */}
+            {/* Användarens profilbild */}
             {session?.user && (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center">
                 {session.user.image && (
                   <img
                     src={session.user.image}
@@ -42,16 +42,13 @@ export function Navbar() {
                     className="w-8 h-8 rounded-full border border-gray-200"
                   />
                 )}
-                <span className="text-sm font-medium text-gray-700">
-                  {session.user.name || 'User'}
-                </span>
               </div>
             )}
 
             {/* Logout knapp */}
             <button
               onClick={handleLogout}
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
+              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               <span>Logout</span>
