@@ -143,9 +143,18 @@ function mapContextAndMood(context: string, mood: string) {
     'Melancholic': { valence: 0.2, energy: 0.3 }
   };
 
+  // Gör case-insensitive lookup
+  const normalizedContext = Object.keys(contextGenres).find(
+    key => key.toLowerCase() === context.toLowerCase()
+  ) || context;
+  
+  const normalizedMood = Object.keys(moodFeatures).find(
+    key => key.toLowerCase() === mood.toLowerCase()
+  ) || mood;
+
   return {
-    seedGenres: contextGenres[context] || ['pop'],
-    targetFeatures: moodFeatures[mood] || { valence: 0.5, energy: 0.5 }
+    seedGenres: contextGenres[normalizedContext] || ['pop'],
+    targetFeatures: moodFeatures[normalizedMood] || { valence: 0.5, energy: 0.5 }
   };
 }
 
