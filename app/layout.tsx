@@ -12,6 +12,9 @@ const ibmPlexSans = IBM_Plex_Sans({
 export const metadata: Metadata = {
   title: "Moodify - Music that matches your mood",
   description: "Discover the perfect playlist for any moment.",
+  icons: {
+    icon: "/moodify-icon.svg",
+  },
 };
 
 export default function RootLayout({
