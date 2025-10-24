@@ -8,7 +8,21 @@ async function createSpotifyPlaylist(accessToken: string, context: string, mood:
   const playlistName = `Moodify - ${context} (${mood})`;
   const description = `En personlig playlist för ${context.toLowerCase()} när du känner dig ${mood.toLowerCase()}`;
   
-  const response = await fetch('https://api.spotify.com/v1/me/playlists', {
+  // Hämta användar-ID först
+  const userResponse = await fetch('https://api.spotify.com/v1/me', {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+    }
+  });
+  
+  if (!userResponse.ok) {
+    throw new Error(`Failed to get user info: ${userResponse.status}`);
+  }
+  
+  const user = await userResponse.json();
+  const userId = user.id;
+  
+  const response = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -22,26 +36,53 @@ async function createSpotifyPlaylist(accessToken: string, context: string, mood:
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to create playlist: ${response.status}`);
+    const errorText = await response.text();
+    console.error('Create playlist error:', response.status, errorText);
+    throw new Error(`Failed to create playlist: ${response.status} - ${errorText}`);
   }
 
   return await response.json();
 }
 
 async function getTrackRecommendations(accessToken: string, context: string, mood: string) {
+  // Hämta användarens toppartister för personliga rekommendationer
+  const topArtistsResponse = await fetch('https://api.spotify.com/v1/me/top/artists?limit=5&time_range=medium_term', {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+    }
+  });
+
+  let seedArtists = [];
+  if (topArtistsResponse.ok) {
+    const topArtists = await topArtistsResponse.json();
+    seedArtists = topArtists.items.map((artist: { id: string }) => artist.id).slice(0, 2);
+    console.log('Using user\'s top artists:', seedArtists);
+  }
+
+  // Fallback till generiska artister om användaren inte har tillräckligt med data
+  if (seedArtists.length === 0) {
+    seedArtists = [
+      '4gzpq5DPGxSnKTe4SA8HAU', // Coldplay
+      '1dfeR4HaWDbWqFHLkxsg1d'  // Queen
+    ];
+    console.log('Using fallback artists:', seedArtists);
+  }
+
   // Mappa context och mood till Spotify parametrar
   const { seedGenres, targetFeatures } = mapContextAndMood(context, mood);
   
   const params = new URLSearchParams({
     limit: '20',
-    seed_genres: seedGenres.slice(0, 5).join(','), // Max 5 genres
+    seed_artists: seedArtists.join(','),
+    seed_genres: seedGenres.slice(0, 3).join(','), // Max 3 genres
     ...(targetFeatures.valence !== undefined && { target_valence: targetFeatures.valence.toString() }),
     ...(targetFeatures.energy !== undefined && { target_energy: targetFeatures.energy.toString() })
   });
 
   console.log('Spotify API Request:', {
     url: `https://api.spotify.com/v1/recommendations?${params}`,
-    seedGenres: seedGenres.slice(0, 5),
+    seedArtists,
+    seedGenres: seedGenres.slice(0, 3),
     targetFeatures
   });
 
@@ -58,6 +99,7 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
   }
 
   const data = await response.json();
+  console.log('Recommendations response:', data);
   return data.tracks.map((track: { uri: string }) => track.uri);
 }
 
@@ -74,12 +116,14 @@ async function addTracksToPlaylist(accessToken: string, playlistId: string, trac
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to add tracks: ${response.status}`);
+    const errorText = await response.text();
+    console.error('Add tracks error:', response.status, errorText);
+    throw new Error(`Failed to add tracks: ${response.status} - ${errorText}`);
   }
 }
 
 function mapContextAndMood(context: string, mood: string) {
-  // Mappa context till genres
+  // Mappa context till genres - använd endast Spotify-verifierade genres
   const contextGenres: { [key: string]: string[] } = {
     'Work': ['pop', 'ambient', 'classical'],
     'Study': ['ambient', 'classical', 'pop'],
@@ -99,9 +143,18 @@ function mapContextAndMood(context: string, mood: string) {
     'Melancholic': { valence: 0.2, energy: 0.3 }
   };
 
+  // Gör case-insensitive lookup
+  const normalizedContext = Object.keys(contextGenres).find(
+    key => key.toLowerCase() === context.toLowerCase()
+  ) || context;
+  
+  const normalizedMood = Object.keys(moodFeatures).find(
+    key => key.toLowerCase() === mood.toLowerCase()
+  ) || mood;
+
   return {
-    seedGenres: contextGenres[context] || ['pop'],
-    targetFeatures: moodFeatures[mood] || { valence: 0.5, energy: 0.5 }
+    seedGenres: contextGenres[normalizedContext] || ['pop'],
+    targetFeatures: moodFeatures[normalizedMood] || { valence: 0.5, energy: 0.5 }
   };
 }
 
@@ -125,7 +178,7 @@ export function PlaylistGenerator({
 
   const generatePlaylist = async () => {
     if (!session?.accessToken) {
-      const errorMsg = "No access token available";
+      const errorMsg = "No access token available. Please log out and log in again.";
       setError(errorMsg);
       onError?.(errorMsg);
       return;
@@ -136,16 +189,26 @@ export function PlaylistGenerator({
 
     try {
       console.log(`Genererar playlist för context: ${context}, mood: ${mood}`);
+      console.log('Access token available:', !!session.accessToken);
       
       // 1. Skapa en ny playlist
+      console.log('Creating playlist...');
       const playlist = await createSpotifyPlaylist(session.accessToken, context, mood);
+      console.log('Playlist created:', playlist);
       
       // 2. Hämta låtrekommendationer baserat på context och mood
+      console.log('Getting track recommendations...');
       const tracks = await getTrackRecommendations(session.accessToken, context, mood);
+      console.log('Tracks found:', tracks.length);
       
       // 3. Lägg till låtar till playlisten
       if (tracks.length > 0) {
+        console.log('Adding tracks to playlist...');
         await addTracksToPlaylist(session.accessToken, playlist.id, tracks);
+        console.log('Tracks added successfully');
+      } else {
+        console.warn('No tracks found for recommendations');
+        throw new Error('No tracks found for the selected context and mood. Please try different selections.');
       }
       
       // 4. Returnera playlist-URL
@@ -153,6 +216,7 @@ export function PlaylistGenerator({
       onComplete?.(playlist.external_urls.spotify);
       
     } catch (err) {
+      console.error('Playlist generation error:', err);
       const errorMsg = err instanceof Error ? err.message : "Failed to generate playlist";
       setError(errorMsg);
       onError?.(errorMsg);
