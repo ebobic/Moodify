@@ -46,7 +46,7 @@ async function createSpotifyPlaylist(accessToken: string, context: string, mood:
 
 async function getTrackRecommendations(accessToken: string, context: string, mood: string) {
   // Hämta användarens toppartister för personliga rekommendationer
-  const topArtistsResponse = await fetch('https://api.spotify.com/v1/me/top/artists?limit=3&time_range=medium_term', {
+  const topArtistsResponse = await fetch('https://api.spotify.com/v1/me/top/artists?limit=6&time_range=medium_term', {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
     }
@@ -59,51 +59,52 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
     console.log('Using user\'s top artists for personalization:', personalArtists);
   }
 
-  // Skapa smart sökterm baserat på användarens artister + context + mood
-  let searchQuery;
-  if (personalArtists.length > 0) {
-    // Sök efter låtar från användarens favoritartister + context/mood
-    searchQuery = `${personalArtists[0]} ${context} ${mood}`;
-  } else {
-    // Fallback till bara context + mood
-    searchQuery = `${context} ${mood}`;
-  }
+  // Skapa flera söktermer baserat på användarens artister + context + mood
+  let allTracks = [];
   
-  console.log('Searching for tracks with personalized query:', searchQuery);
+  if (personalArtists.length > 0) {
+    // Sök med varje artist för mer variation
+    for (let i = 0; i < Math.min(personalArtists.length, 6); i++) {
+      const searchQuery = `${personalArtists[i]} ${context} ${mood}`;
+      console.log(`Searching with artist ${i + 1}:`, searchQuery);
+      
+      const searchResponse = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(searchQuery)}&type=track&limit=4`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        }
+      });
 
-  // Sök efter låtar baserat på personlig sökterm
-  const searchResponse = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(searchQuery)}&type=track&limit=20`, {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      if (searchResponse.ok) {
+        const searchData = await searchResponse.json();
+        console.log(`Results for ${personalArtists[i]}:`, searchData.tracks.items.length);
+        allTracks = [...allTracks, ...searchData.tracks.items];
+      }
     }
-  });
-
-  if (!searchResponse.ok) {
-    const errorText = await searchResponse.text();
-    console.error('Spotify Search API Error:', searchResponse.status, errorText);
-    throw new Error(`Failed to search tracks: ${searchResponse.status} - ${errorText}`);
   }
 
-  const searchData = await searchResponse.json();
-  console.log('Personalized search results:', searchData);
-
-  // Om vi inte får tillräckligt med resultat, försök med bara context
-  if (searchData.tracks.items.length < 10) {
-    console.log('Not enough personalized results, trying with context only:', context);
-    const contextSearchResponse = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(context)}&type=track&limit=20`, {
+  // Om vi inte får tillräckligt med resultat från artister, lägg till generiska sökresultat
+  if (allTracks.length < 15) {
+    console.log('Not enough personalized results, adding generic search:', context);
+    const genericSearchResponse = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(context)} ${mood}&type=track&limit=${20 - allTracks.length}`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
       }
     });
 
-    if (contextSearchResponse.ok) {
-      const contextData = await contextSearchResponse.json();
-      console.log('Context search results:', contextData);
-      return contextData.tracks.items.map((track: { uri: string }) => track.uri);
+    if (genericSearchResponse.ok) {
+      const genericData = await genericSearchResponse.json();
+      console.log('Generic search results:', genericData.tracks.items.length);
+      allTracks = [...allTracks, ...genericData.tracks.items];
     }
   }
 
-  return searchData.tracks.items.map((track: { uri: string }) => track.uri);
+  // Ta bort duplicater och returnera max 20 låtar
+  const uniqueTracks = allTracks.filter((track, index, self) => 
+    index === self.findIndex(t => t.id === track.id)
+  ).slice(0, 20);
+
+  console.log('Final track count:', uniqueTracks.length);
+  return uniqueTracks.map((track: { uri: string }) => track.uri);
 }
 
 async function addTracksToPlaylist(accessToken: string, playlistId: string, trackUris: string[]) {
