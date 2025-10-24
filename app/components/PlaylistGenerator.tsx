@@ -45,62 +45,43 @@ async function createSpotifyPlaylist(accessToken: string, context: string, mood:
 }
 
 async function getTrackRecommendations(accessToken: string, context: string, mood: string) {
-  // Hämta användarens toppartister för personliga rekommendationer
-  const topArtistsResponse = await fetch('https://api.spotify.com/v1/me/top/artists?limit=5&time_range=medium_term', {
+  // Skapa smart sökterm baserat på context och mood
+  const searchQuery = `${context} ${mood}`;
+  console.log('Searching for tracks with query:', searchQuery);
+
+  // Sök efter låtar baserat på context och mood
+  const searchResponse = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(searchQuery)}&type=track&limit=20`, {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
     }
   });
 
-  let seedArtists = [];
-  if (topArtistsResponse.ok) {
-    const topArtists = await topArtistsResponse.json();
-    seedArtists = topArtists.items.map((artist: { id: string }) => artist.id).slice(0, 2);
-    console.log('Using user\'s top artists:', seedArtists);
+  if (!searchResponse.ok) {
+    const errorText = await searchResponse.text();
+    console.error('Spotify Search API Error:', searchResponse.status, errorText);
+    throw new Error(`Failed to search tracks: ${searchResponse.status} - ${errorText}`);
   }
 
-  // Fallback till generiska artister om användaren inte har tillräckligt med data
-  if (seedArtists.length === 0) {
-    seedArtists = [
-      '4gzpq5DPGxSnKTe4SA8HAU', // Coldplay
-      '1dfeR4HaWDbWqFHLkxsg1d'  // Queen
-    ];
-    console.log('Using fallback artists:', seedArtists);
-  }
+  const searchData = await searchResponse.json();
+  console.log('Search results:', searchData);
 
-  // Mappa context och mood till Spotify parametrar
-  const { seedGenres, targetFeatures } = mapContextAndMood(context, mood);
-  
-  const params = new URLSearchParams({
-    limit: '20',
-    seed_artists: seedArtists.join(','),
-    ...(targetFeatures.valence !== undefined && { target_valence: targetFeatures.valence.toString() }),
-    ...(targetFeatures.energy !== undefined && { target_energy: targetFeatures.energy.toString() })
-  });
+  // Om vi inte får tillräckligt med resultat, försök med bara context
+  if (searchData.tracks.items.length < 10) {
+    console.log('Not enough results, trying with context only:', context);
+    const contextSearchResponse = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(context)}&type=track&limit=20`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      }
+    });
 
-  console.log('Spotify API Request:', {
-    url: `https://api.spotify.com/v1/recommendations?${params}`,
-    seedArtists,
-    targetFeatures,
-    fullUrl: `https://api.spotify.com/v1/recommendations?${params}`,
-    paramsString: params.toString()
-  });
-
-  const response = await fetch(`https://api.spotify.com/v1/recommendations?${params}`, {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
+    if (contextSearchResponse.ok) {
+      const contextData = await contextSearchResponse.json();
+      console.log('Context search results:', contextData);
+      return contextData.tracks.items.map((track: { uri: string }) => track.uri);
     }
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('Spotify API Error:', response.status, errorText);
-    throw new Error(`Failed to get recommendations: ${response.status} - ${errorText}`);
   }
 
-  const data = await response.json();
-  console.log('Recommendations response:', data);
-  return data.tracks.map((track: { uri: string }) => track.uri);
+  return searchData.tracks.items.map((track: { uri: string }) => track.uri);
 }
 
 async function addTracksToPlaylist(accessToken: string, playlistId: string, trackUris: string[]) {
@@ -122,41 +103,7 @@ async function addTracksToPlaylist(accessToken: string, playlistId: string, trac
   }
 }
 
-function mapContextAndMood(context: string, mood: string) {
-  // Mappa context till genres - använd endast Spotify-verifierade genres
-  const contextGenres: { [key: string]: string[] } = {
-    'Work': ['pop', 'ambient', 'classical'],
-    'Study': ['ambient', 'classical', 'pop'],
-    'Workout': ['pop', 'rock', 'electronic'],
-    'Party': ['pop', 'dance', 'electronic'],
-    'Commute': ['pop', 'indie', 'rock'],
-    'Relax': ['ambient', 'acoustic', 'pop']
-  };
-
-  // Mappa mood till audio features
-  const moodFeatures: { [key: string]: { valence?: number; energy?: number } } = {
-    'Happy': { valence: 0.8, energy: 0.7 },
-    'Energetic': { energy: 0.9, valence: 0.7 },
-    'Calm': { valence: 0.6, energy: 0.3 },
-    'Focused': { energy: 0.5, valence: 0.5 },
-    'Romantic': { valence: 0.7, energy: 0.4 },
-    'Melancholic': { valence: 0.2, energy: 0.3 }
-  };
-
-  // Gör case-insensitive lookup
-  const normalizedContext = Object.keys(contextGenres).find(
-    key => key.toLowerCase() === context.toLowerCase()
-  ) || context;
-  
-  const normalizedMood = Object.keys(moodFeatures).find(
-    key => key.toLowerCase() === mood.toLowerCase()
-  ) || mood;
-
-  return {
-    seedGenres: contextGenres[normalizedContext] || ['pop'],
-    targetFeatures: moodFeatures[normalizedMood] || { valence: 0.5, energy: 0.5 }
-  };
-}
+// Denna funktion behövs inte längre eftersom vi använder search istället för recommendations
 
 interface PlaylistGeneratorProps {
   context: string;
