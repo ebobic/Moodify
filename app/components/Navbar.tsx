@@ -48,7 +48,7 @@ export function Navbar() {
             {/* Logout knapp */}
             <button
               onClick={handleLogout}
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
+              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               <span>Logout</span>
