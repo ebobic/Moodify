@@ -68,12 +68,13 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
     console.log('Using fallback artists:', seedArtists);
   }
 
-  // Mappa mood till audio features
-  const { targetFeatures } = mapContextAndMood(context, mood);
+  // Mappa context och mood till Spotify parametrar
+  const { seedGenres, targetFeatures } = mapContextAndMood(context, mood);
   
   const params = new URLSearchParams({
     limit: '20',
     seed_artists: seedArtists.join(','),
+    seed_genres: seedGenres.slice(0, 3).join(','), // Max 3 genres
     ...(targetFeatures.valence !== undefined && { target_valence: targetFeatures.valence.toString() }),
     ...(targetFeatures.energy !== undefined && { target_energy: targetFeatures.energy.toString() })
   });
@@ -81,6 +82,7 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
   console.log('Spotify API Request:', {
     url: `https://api.spotify.com/v1/recommendations?${params}`,
     seedArtists,
+    seedGenres: seedGenres.slice(0, 3),
     targetFeatures
   });
 
