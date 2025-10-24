@@ -100,7 +100,7 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
   
   // Lägg till användarens topplåtar i början för personlig touch
   if (personalTracks.length > 0) {
-    const personalUris = personalTracks.map(id => `spotify:track:${id}`);
+    const personalUris = personalTracks.map((id: string) => `spotify:track:${id}`);
     console.log('Adding personal tracks for better personalization');
     return [...personalUris.slice(0, 3), ...allTracks.slice(0, 17)].map((track: { uri: string }) => track.uri);
   }
