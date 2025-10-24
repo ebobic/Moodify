@@ -8,7 +8,21 @@ async function createSpotifyPlaylist(accessToken: string, context: string, mood:
   const playlistName = `Moodify - ${context} (${mood})`;
   const description = `En personlig playlist för ${context.toLowerCase()} när du känner dig ${mood.toLowerCase()}`;
   
-  const response = await fetch('https://api.spotify.com/v1/me/playlists', {
+  // Hämta användar-ID först
+  const userResponse = await fetch('https://api.spotify.com/v1/me', {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+    }
+  });
+  
+  if (!userResponse.ok) {
+    throw new Error(`Failed to get user info: ${userResponse.status}`);
+  }
+  
+  const user = await userResponse.json();
+  const userId = user.id;
+  
+  const response = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -31,43 +45,50 @@ async function createSpotifyPlaylist(accessToken: string, context: string, mood:
 }
 
 async function getTrackRecommendations(accessToken: string, context: string, mood: string) {
-  // Mappa context och mood till Spotify parametrar
-  const { seedGenres, targetFeatures } = mapContextAndMood(context, mood);
+  // Hämta användarens toppartister för personliga rekommendationer
+  const topArtistsResponse = await fetch('https://api.spotify.com/v1/me/top/artists?limit=5&time_range=medium_term', {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+    }
+  });
+
+  let seedArtists = [];
+  if (topArtistsResponse.ok) {
+    const topArtists = await topArtistsResponse.json();
+    seedArtists = topArtists.items.map((artist: { id: string }) => artist.id).slice(0, 2);
+    console.log('Using user\'s top artists:', seedArtists);
+  }
+
+  // Fallback till generiska artister om användaren inte har tillräckligt med data
+  if (seedArtists.length === 0) {
+    seedArtists = [
+      '4gzpq5DPGxSnKTe4SA8HAU', // Coldplay
+      '1dfeR4HaWDbWqFHLkxsg1d'  // Queen
+    ];
+    console.log('Using fallback artists:', seedArtists);
+  }
+
+  // Mappa mood till audio features
+  const { targetFeatures } = mapContextAndMood(context, mood);
   
-  // Försök först med alla parametrar
-  let params = new URLSearchParams({
+  const params = new URLSearchParams({
     limit: '20',
-    seed_genres: seedGenres.slice(0, 5).join(','), // Max 5 genres
+    seed_artists: seedArtists.join(','),
     ...(targetFeatures.valence !== undefined && { target_valence: targetFeatures.valence.toString() }),
     ...(targetFeatures.energy !== undefined && { target_energy: targetFeatures.energy.toString() })
   });
 
   console.log('Spotify API Request:', {
     url: `https://api.spotify.com/v1/recommendations?${params}`,
-    seedGenres: seedGenres.slice(0, 5),
+    seedArtists,
     targetFeatures
   });
 
-  let response = await fetch(`https://api.spotify.com/v1/recommendations?${params}`, {
+  const response = await fetch(`https://api.spotify.com/v1/recommendations?${params}`, {
     headers: {
       'Authorization': `Bearer ${accessToken}`,
     }
   });
-
-  // Om första försöket misslyckas, försök med bara genres
-  if (!response.ok) {
-    console.log('First attempt failed, trying with genres only...');
-    params = new URLSearchParams({
-      limit: '20',
-      seed_genres: seedGenres.slice(0, 5).join(',')
-    });
-    
-    response = await fetch(`https://api.spotify.com/v1/recommendations?${params}`, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-      }
-    });
-  }
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -100,7 +121,7 @@ async function addTracksToPlaylist(accessToken: string, playlistId: string, trac
 }
 
 function mapContextAndMood(context: string, mood: string) {
-  // Mappa context till genres
+  // Mappa context till genres - använd endast Spotify-verifierade genres
   const contextGenres: { [key: string]: string[] } = {
     'Work': ['pop', 'ambient', 'classical'],
     'Study': ['ambient', 'classical', 'pop'],
