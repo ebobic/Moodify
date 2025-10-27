@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { Dumbbell, Briefcase, BookOpen, PartyPopper, Car, Home, Smile, Zap, Wind, Target, Heart, Cloud } from "lucide-react";
 import { Navbar } from "../components/layout/Navbar";
 import { PlaylistGenerator } from "../components/features/PlaylistGenerator";
@@ -67,9 +68,11 @@ export default function HomePage() {
           {/* Visa användarens profilbild från Spotify om tillgänglig */}
           {session?.user?.image && (
             <div className="mb-4">
-              <img 
+              <Image 
                 src={session.user.image} 
                 alt="Profile picture" 
+                width={80}
+                height={80}
                 className="w-20 h-20 rounded-full mx-auto border-2 border-gray-200"
               />
             </div>
@@ -320,7 +323,7 @@ export default function HomePage() {
                   <PlaylistGenerator 
                     context={selectedContext}
                     mood={selectedMood}
-                    onComplete={(playlistUrl) => {
+                    onComplete={() => {
                       // Playlist created successfully
                     }}
                     onError={(error) => {

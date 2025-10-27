@@ -36,9 +36,11 @@ export function Navbar() {
             {session?.user && (
               <div className="flex items-center">
                 {session.user.image && (
-                  <img
+                  <Image
                     src={session.user.image}
                     alt="Profile picture"
+                    width={32}
+                    height={32}
                     className="w-8 h-8 rounded-full border border-gray-200"
                   />
                 )}
