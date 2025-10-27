@@ -25,6 +25,10 @@ const authOptions: NextAuthOptions = {
       },
     }),
   ],
+  pages: {
+    signIn: "/",
+    error: "/",
+  },
   callbacks: {
     // Spara Spotify access token när användaren loggar in
     async jwt({ token, account }) {
