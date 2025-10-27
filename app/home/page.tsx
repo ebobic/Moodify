@@ -3,8 +3,8 @@
 import { useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Dumbbell, Briefcase, BookOpen, PartyPopper, Car, Home, Smile, Zap, Wind, Target, Heart, Cloud } from "lucide-react";
-import { Navbar } from "../components/Navbar";
-import { PlaylistGenerator } from "../components/PlaylistGenerator";
+import { Navbar } from "../components/layout/Navbar";
+import { PlaylistGenerator } from "../components/features/PlaylistGenerator";
 
 export default function HomePage() {
   const step2Ref = useRef<HTMLDivElement>(null);

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { LoginButton } from "./LoginButton";
+import { LoginButton } from "../ui/LoginButton";
 
 export function LandingPage() {
   return (
