@@ -56,7 +56,6 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
   if (topArtistsResponse.ok) {
     const topArtists = await topArtistsResponse.json();
     personalArtists = topArtists.items.map((artist: { name: string }) => artist.name);
-    console.log('Using user\'s top artists for personalization:', personalArtists);
   }
 
   // Skapa flera söktermer baserat på användarens artister + context + mood
@@ -66,7 +65,6 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
     // Sök med varje artist för mer variation
     for (let i = 0; i < Math.min(personalArtists.length, 6); i++) {
       const searchQuery = `${personalArtists[i]} ${context} ${mood}`;
-      console.log(`Searching with artist ${i + 1}:`, searchQuery);
       
       const searchResponse = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(searchQuery)}&type=track&limit=4`, {
         headers: {
@@ -76,7 +74,6 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
 
       if (searchResponse.ok) {
         const searchData = await searchResponse.json();
-        console.log(`Results for ${personalArtists[i]}:`, searchData.tracks.items.length);
         allTracks = [...allTracks, ...searchData.tracks.items];
       }
     }
@@ -84,7 +81,6 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
 
   // Om vi inte får tillräckligt med resultat från artister, lägg till generiska sökresultat
   if (allTracks.length < 15) {
-    console.log('Not enough personalized results, adding generic search:', context);
     const genericSearchResponse = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(context)} ${mood}&type=track&limit=${20 - allTracks.length}`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -93,7 +89,6 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
 
     if (genericSearchResponse.ok) {
       const genericData = await genericSearchResponse.json();
-      console.log('Generic search results:', genericData.tracks.items.length);
       allTracks = [...allTracks, ...genericData.tracks.items];
     }
   }
@@ -103,7 +98,6 @@ async function getTrackRecommendations(accessToken: string, context: string, moo
     index === self.findIndex(t => t.id === track.id)
   ).slice(0, 20);
 
-  console.log('Final track count:', uniqueTracks.length);
   return uniqueTracks.map((track: { uri: string }) => track.uri);
 }
 
@@ -158,26 +152,16 @@ export function PlaylistGenerator({
     setError(null);
 
     try {
-      console.log(`Genererar playlist för context: ${context}, mood: ${mood}`);
-      console.log('Access token available:', !!session.accessToken);
-      
       // 1. Skapa en ny playlist
-      console.log('Creating playlist...');
       const playlist = await createSpotifyPlaylist(session.accessToken, context, mood);
-      console.log('Playlist created:', playlist);
       
       // 2. Hämta låtrekommendationer baserat på context och mood
-      console.log('Getting track recommendations...');
       const tracks = await getTrackRecommendations(session.accessToken, context, mood);
-      console.log('Tracks found:', tracks.length);
       
       // 3. Lägg till låtar till playlisten
       if (tracks.length > 0) {
-        console.log('Adding tracks to playlist...');
         await addTracksToPlaylist(session.accessToken, playlist.id, tracks);
-        console.log('Tracks added successfully');
       } else {
-        console.warn('No tracks found for recommendations');
         throw new Error('No tracks found for the selected context and mood. Please try different selections.');
       }
       

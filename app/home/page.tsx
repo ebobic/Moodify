@@ -47,13 +47,11 @@ export default function HomePage() {
   };
 
   const handleContextClick = (context: string) => {
-    console.log(`Selected context: ${context}`);
     setSelectedContext(context);
     scrollToStep(step2Ref);
   };
 
   const handleMoodClick = (mood: string) => {
-    console.log(`Selected mood: ${mood}`);
     setSelectedMood(mood);
     scrollToStep(step3Ref);
   };
@@ -323,7 +321,7 @@ export default function HomePage() {
                     context={selectedContext}
                     mood={selectedMood}
                     onComplete={(playlistUrl) => {
-                      console.log('Playlist created:', playlistUrl);
+                      // Playlist created successfully
                     }}
                     onError={(error) => {
                       console.error('Playlist creation failed:', error);
