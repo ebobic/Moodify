@@ -10,7 +10,7 @@ interface LoginButtonProps {
 }
 
 export function LoginButton({ 
-  callbackUrl = "/home", 
+  callbackUrl = "/create-playlist", 
   className = "",
   children 
 }: LoginButtonProps) {
