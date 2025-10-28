@@ -139,4 +139,3 @@ Detta projekt är utvecklat i utbildningssyfte och är inte avsett för kommersi
 
 ---
 
-**Utvecklat med ❤️ och mycket kaffe ☕**
