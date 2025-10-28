@@ -1,3 +1,7 @@
+
+<img width="948" height="367" alt="image" src="https://github.com/user-attachments/assets/8d116639-0e4e-48f0-a058-c4bb80cd5552" />
+
+
 # 🎵 Moodify - Spotify Playlist Generator
 
 En  spellistegenerator som skapar personliga Spotify-spellistor baserat på ditt humör och kontext. Byggd med Next.js 15, TypeScript och Spotify Web API. Projektet använder OAuth-autentisering för säker inloggning och skapar spellistor genom smart sökning baserad på användarens lyssningshistorik och valda stämning.
@@ -7,6 +11,7 @@ En  spellistegenerator som skapar personliga Spotify-spellistor baserat på ditt
 - [📖 Om projektet](#-om-projektet)
 - [✨ Funktioner](#-funktioner)
 - [🛠 Teknologier](#-teknologier)
+- [🎨 Screenshots](#-screenshots)
 - [⚙️ Installation](#️-installation)
 - [🚀 Användning](#-användning)
 - [📂 Projektstruktur](#-projektstruktur)
@@ -42,6 +47,19 @@ Syftet med projektet är att:
 - **Tailwind CSS** - Utility-first CSS-ramverk för snabb styling
 - **Spotify Web API** - Integration för musikdata och spellistehantering
 - **Lucide React** - Moderna ikoner för användargränssnittet
+
+ ## 🎨 Screenshots
+
+ ## Landing page
+ <img width="2558" height="1234" alt="image" src="https://github.com/user-attachments/assets/2445f671-da9f-4a7d-85a2-b184a323fe6e" />
+
+ ## Skapa en playlist
+ <img width="2163" height="1238" alt="image" src="https://github.com/user-attachments/assets/bceed664-1895-493e-bab6-edf122ddfdbb" />
+
+ <img width="2136" height="1228" alt="image" src="https://github.com/user-attachments/assets/1862222c-454d-4532-ab79-58d4fa0945a3" />
+
+
+
 
 ## ⚙️ Installation
 
