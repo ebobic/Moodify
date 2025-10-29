@@ -24,11 +24,6 @@ En  spellistegenerator som skapar personliga Spotify-spellistor baserat på ditt
 
 Moodify är en webapplikation som gör det enkelt att skapa personliga Spotify-spellistor baserat på ditt humör och situation. Genom att integrera med Spotify Web API kan användare logga in med sitt Spotify-konto och få skräddarsydda spellistor som matchar deras mood ;)
 
-Syftet med projektet är att:
-- Förenkla processen att hitta ny musik som passar stämningen
-- Kombinera personlig lyssningshistorik med intelligent sökning
-- Skapa en smidig användarupplevelse för musikupptäckt
-- Utforska modern webbutveckling med Next.js och externa API:er
 
 ## ✨ Funktioner
 
